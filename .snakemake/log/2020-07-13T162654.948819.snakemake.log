@@ -1,0 +1,24 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	exploratory_analysis
+	1
+
+[Mon Jul 13 16:26:54 2020]
+rule exploratory_analysis:
+    input: Data/kompdf
+    output: Plots/komp-exp1.pdf, Plots/komp-exp2.pdf
+    jobid: 0
+
+Waiting at most 20 seconds for missing files.
+MissingOutputException in line 3 of /Users/sabnig/Lab-Projects/Analysis/Komp-Gait-Analysis/Snakefile:
+Job completed successfully, but some output files are missing. Missing files after 20 seconds:
+Plots/komp-exp1.pdf
+Plots/komp-exp2.pdf
+This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait.
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /Users/sabnig/Lab-Projects/Analysis/Komp-Gait-Analysis/.snakemake/log/2020-07-13T162654.948819.snakemake.log

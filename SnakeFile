@@ -1,0 +1,9 @@
+plots_exp = ["komp-exp1","komp-exp2","komp-exp3"] 
+
+rule exploratory_analysis: 
+	input: ["Data/kompdf"]
+	output: expand("Plots/{plot}.pdf", plot=plots_exp)
+	script: 'Code/exploratory.R'
+
+rule clean:
+	shell: 'rm Plots/*.pdf'

@@ -1,0 +1,19 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	exploratory_analysis
+	1
+
+[Mon Jul 13 16:46:21 2020]
+rule exploratory_analysis:
+    input: Data/kompdf
+    output: Plots/komp-exp1.pdf, Plots/komp-exp2.pdf
+    jobid: 0
+
+[Mon Jul 13 16:46:43 2020]
+Finished job 0.
+1 of 1 steps (100%) done
+Complete log: /Users/sabnig/Lab-Projects/Analysis/Komp-Gait-Analysis/.snakemake/log/2020-07-13T164621.624083.snakemake.log
