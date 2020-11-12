@@ -1,4 +1,5 @@
-plots_exp = ["all-exp1","all-exp2","all-exp3","time-komp"] 
+plots_exp = ["all-exp1","all-exp2","all-exp3","time-komp","BG-density","BG-boxplot",
+"BG-animal-density","BG-boxplot-density"] 
 
 rule exploratory_analysis: 
 	input: ["Data/kompdf"]
