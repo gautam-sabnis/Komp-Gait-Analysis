@@ -171,6 +171,16 @@ p <- plot_grid(p3+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_
 	p5+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_blank()), nrow=3)
 plot_grid(p,legend,rel_widths = c(3, .4))
 ggsave('../Temp5/time-sl-sw-stl.pdf', width=16.50,height=6)
+
+p <- plot_grid(p1+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_blank(),axis.ticks.x=element_blank()),
+	p2+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_blank(),axis.ticks.x=element_blank()),
+	p6+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_blank()),
+	p7+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_blank()),
+	p8+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_blank()),
+	p9+labs(x=NULL)+theme(legend.position='none',axis.text.x=element_blank()), nrow=6)
+
+ggsave('../Temp5/time-supp.pdf', width=12.50,height=12)
+
 #Density based plots
 #By Strain
 data_per_strain <- aggregate(x = data_per_animal[,names(data_per_animal) %in% c(Phenos.lin,"BodyLength")], by = data_per_animal[c("Strain")], FUN = mean)
@@ -224,11 +234,16 @@ ggsave(snakemake@output[[8]], width=12, height=12)
 #Stride density plot
 data_per_stride <- data_per_stride[data_per_stride$MouseID %in% data_per_animal$MouseID,]
 data_per_stride$MouseID <- droplevels(data_per_stride$MouseID)
-ggplot(data.frame(Strides = as.numeric(table(data_per_stride$MouseID))), aes(x = Strides)) + 
-geom_density() + ggtitle('All speed bins with ang_vel = (-20,20)') + 
+df.tmp <- data.frame(Strides = as.numeric(table(data_per_stride$MouseID)))
+Sex <- sapply(seq(dim(data_per_animal)[1]), function(x) 
+	data_per_stride[data_per_stride$MouseID == data_per_animal$MouseID[x], 'Sex'][1])
+df.tmp <- cbind(df.tmp, Sex = Sex)
+ggplot(df.tmp, aes(x = Strides, color = Sex)) + 
+geom_density(lwd=1.1) + ggtitle('All speed bins with ang_vel = (-20,20)') + 
 geom_vline(xintercept = as.numeric(summary(as.numeric(table(data_per_stride$MouseID)))[2]), linetype = 'dashed',
-color='red',lwd=1) + labs(x = 'Number of Strides', y = 'Density') + theme_bw(base_size=14)
-ggsave('../Temp5/central-angvel-bin-stride-density2.pdf', height=4,width=5)
+color='black',lwd=1) + labs(x = 'Number of Strides', y = 'Density') + theme_bw(base_size=14) + 
+scale_color_manual(values=c("#E41A1C", "#377EB8"))
+ggsave('../Temp7/central-angvel-bin-stride-density2.pdf', height=4,width=5)
 
 
 #Pick atleast x animals 
@@ -239,7 +254,7 @@ ggplot(df.tmp, aes(x,y, fill=highlight)) + geom_bar(stat='identity',color='black
 	y = 'Number of Mutant Lines') + scale_x_discrete(limits=rownames(tmp)) + 
 geom_text(label = paste0(df.tmp$y), vjust = -.25, hjust = .5, size=3) + theme_bw(base_size=12) + 
 scale_fill_manual(values = c( "yes"="red", "no"="grey50"), guide=FALSE)
-ggsave('../Temp5/atleastx-hist2.pdf', height=4, width=5)
+ggsave('../Temp7/atleastx-hist2.pdf', height=4, width=5)
 
 #Exploring batch effects 
 df <- data_per_animal[data_per_animal$Strain == 'C57BL/6NJ',]
@@ -249,3 +264,17 @@ scale_color_manual(values=c("#E41A1C", "#377EB8"))
 
 tmp <- sapply(seq(length(Phenos.lin)), function(x) {fit <- lm(df[[Phenos.lin[x]]] ~ BodyLength + speed + Sex + TestDate, 
 	data = df); (Anova(fit,type='II')$'Sum Sq'/sum(Anova(fit,type='II')$'Sum Sq')*100)[4]})
+
+
+
+#####Legends#####
+df.tmp <- data.frame(value = c(0,1,-1), Genotype = c('Mutant','Mutant (Outlier)','Control'))
+p0 <- ggplot(df.tmp,aes(y=value,x=Genotype,color=Genotype)) + geom_point(alpha=0.4) + 
+scale_color_manual(values=c("black","#6a51a3","#d94801")) + theme_bw(base_size=18) +  
+theme(legend.position='top') + 
+guides(color = guide_legend(override.aes = list(size = 5))) 
+legend <- cowplot::get_legend(p0)
+grid.newpage()
+grid.draw(legend)
+dev.print(pdf,'../Temp7/C-legend.pdf', width=6, height=1.5)
+#theme(legend.title=element_blank(),legend.position='top')

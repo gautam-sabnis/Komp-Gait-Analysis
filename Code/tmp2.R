@@ -52,7 +52,7 @@ UpSetR::upset(df, text.scale = 4, point.size = 4, line.size = 2)
 
 
 phenList <- read.csv('../Data/phenotypeHitsPerParameterAndProcedure.csv', header = TRUE)
-allstats <- read.csv('../Data/statistical-results-ALL.csv', header = TRUE)
+allstats <- read.csv('../Data/statistical-result.csv', header = TRUE)
 parameter_id <- phenList[phenList$Parameter.Name %in% c('Gait','Gait (inc. ataxia)'),'Parameter.Id']
 df0 <- allstats[allstats$parameter_stable_id %in% parameter_id, c('parameter_name','marker_symbol','p_value')]
 
@@ -90,7 +90,7 @@ sapply(seq(common_lines), function(x) nrow(data_per_animal[data_per_animal$Strai
 setwd("/Users/sabnig/Documents/Projects/Komp/Temp")
 #experiment <- read.csv('../Data/experiment.csv',header=TRUE)
 df0 <- read.csv('../Data/statistical-result.csv', header=TRUE)
-cutoff <- 0.05
+cutoff <- 0.0001
 df <- df0[df0$p_value < cutoff,names(df0) %in% c('phenotyping_center','marker_symbol','p_value')]
 df <- df[complete.cases(df),]
 rownames(df) <- 1:nrow(df) 
@@ -98,10 +98,49 @@ rownames(df) <- 1:nrow(df)
 tmp <- data.frame(Center = names(table(df$phenotyping_center)), Proportion = as.numeric(table(df$phenotyping_center))/as.numeric(table(df0$phenotyping_center)), 
 	Total = as.numeric(table(df0$phenotyping_center)))
 tmp$Center <- with(tmp,reorder(Center,-Proportion))
+tmp$highlight <- ifelse(tmp$Center == 'JAX', 'yes', 'no')
 
-ggplot(tmp, aes(x = Center, y = Proportion)) + geom_bar(stat = 'identity') + 
-geom_text(label = paste0(tmp$Total),vjust = -.1, hjust = 0.5,size=7.5) + theme_bw(base_size = 22) + 
+ggplot(tmp, aes(x = Center, y = Proportion,fill=highlight)) + geom_bar(stat = 'identity') + 
+geom_text(label = paste0(tmp$Total),vjust = -.1, hjust = 0.5,size=5.5) + theme_bw(base_size = 22) +
+scale_fill_manual(values = c( "yes"="red", "no"="grey20"), guide=FALSE) +  
 theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), legend.position = 'none',
-	axis.text.x.top = element_text(vjust=0.5)) + ggtitle(paste0('p-value < ',cutoff))
-
+	axis.text.x.top = element_text(vjust=0.5)) 
+dev.print(pdf,'../Temp7/center-gait-hits.pdf',width=6.8,height=6.8)
 mutants_gait <- sort(df$marker_symbol[complete.cases(df$marker_symbol)]) 
+
+
+df1 <- df0[df0$phenotyping_center == 'JAX',]
+df2 <- df1[df1$p_value < cutoff,]
+JAX_Strains <- unique(df1$marker_symbol)
+JAX_Strains <- unique(df2$marker_symbol)
+
+#df0[df0$marker_symbol == 'Arpc5l',names(df0) %in% c('phenotyping_center','p_value','mp_term_name_options')]
+
+##############################################################
+load('../Data/dfStrains.Rda')
+Strains1 <- dfStrains[dfStrains$M1 == 1,'Strains']
+Strains2 <- dfStrains[dfStrains$M2 == 1,'Strains']
+Strains3 <- dfStrains[dfStrains$M3 == 1,'Strains']
+MvoutStrains <- dfStrains[dfStrains$Mvout == 1,'Strains']
+Strains1 <- as.character(Strains1)
+Strains2 <- as.character(Strains2)
+Strains3 <- as.character(Strains3)
+MvoutStrains <- as.character(MvoutStrains)
+StrainsALL <- c(Strains1,Strains2,Strains3,MvoutStrains)
+
+Strains1v <- dfStrains[dfStrains$V1 == 1,'Strains']
+Strains2v <- dfStrains[dfStrains$V2 == 1,'Strains']
+Strains3v <- dfStrains[dfStrains$V3 == 1,'Strains']
+Strains1v <- as.character(Strains1v)
+Strains2v <- as.character(Strains2v)
+Strains3v <- as.character(Strains3v)
+StrainsALLv <- c(Strains1v,Strains2v,Strains3v)
+
+
+load('../Data/dfStrains.Rda')
+dfStrains$M1 <- as.numeric(dfStrains$M1) - 1
+dfStrains$M2 <- as.numeric(dfStrains$M2) - 1
+dfStrains$M3 <- as.numeric(dfStrains$M3) - 1
+dfStrains$Mvout <- as.numeric(dfStrains$Mvout) - 1
+df <- dfStrains[,which(names(dfStrains) %in% c('M1','M2','M3','Mvout'))]
+UpSetR::upset(df, text.scale = 8, point.size = 12, line.size = 7)

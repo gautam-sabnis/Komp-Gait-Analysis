@@ -76,7 +76,7 @@ komp_desc_plot <- function(df_animal=data_per_animal, df_strain = data_per_strai
 		geom_point(data = df, aes(x = Strain, y = df[,"mn"]), color = 'black', size = 4, alpha = 0.5) + 
 		scale_color_manual(values=c("#E41A1C", "#377EB8")) + 
 		geom_errorbar(data = df, aes(x = Strain, df[,"mn"], ymin = df[,"mn"]-df[,"std"],
-		ymax = df[,"mn"]+df[,"std"]), color = 'grey') + geom_hline(yintercept = me - std, 
+		ymax = df[,"mn"]+df[,"std"]), color = 'grey30') + geom_hline(yintercept = me - std, 
 		color = "black", size = 1) +  geom_hline(yintercept = me, color = "black", size = 1) +  
 		geom_hline(yintercept = me + std, color = "black", size = 1) + labs(x = 'Strain', y = paste0(phenoname)) + 
 		theme_bw(base_size = 16) + ggtitle('') + theme_bw(base_size = 18) + theme(legend.position = c(0.05,0.85), 
@@ -88,7 +88,7 @@ komp_desc_plot <- function(df_animal=data_per_animal, df_strain = data_per_strai
 		geom_point(data = df, aes(y = Strain, x = df[,"mn"]), color = 'black', size = 4, alpha = 0.5) + 
 		scale_color_manual(values=c("#E41A1C", "#377EB8")) + 
 		geom_errorbarh(data = df, aes(y = Strain, df[,"mn"], xmin = df[,"mn"]-df[,"std"],
-		xmax = df[,"mn"]+df[,"std"]), color = 'grey') + geom_vline(xintercept = me - std, 
+		xmax = df[,"mn"]+df[,"std"]), color = 'grey30') + geom_vline(xintercept = me - std, 
 		color = "black", size = 1,alpha = 0.6) +  geom_vline(xintercept = me, color = "black", size = 1,alpha = 0.5) +  
 		geom_vline(xintercept = me + std, color = "black", size = 1,alpha = 0.6) + labs(y = 'Strain', x = paste0(phenoname)) +  
 		theme_bw(base_size = 26) + ggtitle('') + theme(legend.position = c(0.60,0.05), 
@@ -103,9 +103,10 @@ legend <- get_legend(p1)
 
 p <- plot_grid(p3+theme(legend.position='none'),p4+labs(y=NULL)+theme(legend.position='none'),
 	p5+labs(y=NULL)+theme(legend.position='none'),ncol=3)
-plot_grid(p,legend,rel_widths = c(10, .1))
+#plot_grid(p,legend,rel_widths = c(10, .1))
+plot_grid(p)
 
-dev.print(pdf,'../Temp5/sl-sw-strl-desc.pdf',width=15,height=25)
+dev.print(pdf,'../Temp7/sl-sw-strl-desc.pdf',width=15,height=25)
 
 p <- plot_grid(p1+theme(legend.position='none'),p2+labs(y=NULL)+theme(legend.position='none'),
 	p6+labs(y=NULL)+theme(legend.position='none'),ncol=3)

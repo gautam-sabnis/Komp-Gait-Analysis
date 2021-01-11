@@ -137,13 +137,13 @@ df.out[df.out$rodist > 5.5, 'Outlier'] <- -1
 #(ifelse(mvoutlier::aq.plot(df[,names(df) %in% Phenos.lin])$outliers==TRUE,1,0))
 df.out$Outlier <- as.factor(df.out$Outlier)
 ggplot(df.out, aes(x=mahadist, y=rodist)) + geom_point(alpha=0.6, aes(color=Outlier), size=4) + 
-ggrepel::geom_text_repel(aes(label=ifelse(Outlier %in% c(-1),as.character(MouseID),'')),size=6,box.padding=2) + 
+ggrepel::geom_text_repel(aes(label=ifelse(Outlier %in% c(-1),as.character(MouseID),'')),size=4,box.padding=2) + 
 labs(x = 'Mahalanobis Distance', y = 'Robust Distance') + ggtitle('KOMP animal outliers') + scale_color_manual(values=c("red","black","grey50")) + 
 theme_bw(base_size = 16) + theme(legend.position='none')
 
 df <- data.frame(Strain = data_per_animal$Strain, MouseID = data_per_animal$MouseID, Sex = data_per_animal$Sex)
 df <- cbind(df, apply(data_per_animal[,names(data_per_animal) %in% Phenos.lin],2,function(x) (x - mean(x))/sd(x)))
-tmp <- mvoutlier::pcout(df[,names(df) %in% Phenos.lin])
+tmp <- mvoutlier::pcout(df[,names(df) %in% Phenos.lin],makeplot=TRUE)
 df.out <- data.frame(Distance1 = tmp$x.dist1, Distance2 = tmp$x.dist2, 
 	Label = paste0(df[,'MouseID']," (", df[,'Strain'], ")"), MouseID = df[,'MouseID'], Strain = df[,'Strain'],
 	Outlier = as.numeric(!tmp$wfinal01))
@@ -152,15 +152,26 @@ df.out[df.out$MouseID == 'J80962', 'Outlier'] <- -1
 df.out[df.out$MouseID == 'J76119', 'Outlier'] <- -1
 df.out$Outlier <- as.factor(df.out$Outlier)
 ggplot(df.out, aes(x = Distance1, y=Distance2)) + geom_point(alpha=0.8, aes(color=Outlier), size=4) + 
-ggrepel::geom_text_repel(aes(label=ifelse(Outlier==-1,as.character(Label),'')),size=4,box.padding=2) + 
+ggrepel::geom_text_repel(aes(label=ifelse(Outlier==-1,as.character(Label),'')),size=5,box.padding=2) + 
 labs(x = 'Distance1', y = 'Distance2') + ggtitle('KOMP Outliers') + scale_color_manual(values=c("red","black","grey50")) + 
-theme_bw(base_size = 22) + theme(legend.position='none') + ggtitle('KOMP animal outliers')
-ggsave('../Temp6/komp-animal-outliers.pdf', width=10, height=10)
+theme_bw(base_size = 28) + theme(legend.position='none') + ggtitle('KOMP animal outliers')
+ggsave('../Temp7/komp-animal-outliers2.pdf', width=36, height=36, limitsize=FALSE) #base_size=98 for plots
+
+#df.out[df.out$Outlier %in% c(1,-1),'Outlier'] <- -1
+#df.out[df.out$Strain == 'Rab6b-/-','Outlier'] <- 1
+#df.out[df.out$Strain == 'Lamp5-/-','Outlier'] <- 1
+#df.out$Outlier <- as.factor(df.out$Outlier)
+ggplot(df.out, aes(x = Distance1, y=Distance2)) + geom_point(alpha=0.8, aes(color=Outlier), size=4) + 
+ggrepel::geom_text_repel(aes(label=ifelse(Outlier==1,as.character(Label),'')),size=5,box.padding=2) + 
+labs(x = 'Distance1', y = 'Distance2') + ggtitle('KOMP Outliers') + scale_color_manual(values=c("grey50","black","red")) + 
+theme_bw(base_size = 28) + theme(legend.position='none') + ggtitle('KOMP animal outliers')
+
 
 out.df <- df.out[df.out$Outlier %in% c(1,-1), names(df.out) %in% c('Strain','MouseID')]
+#out.df <- out.df[out.df$Strain %in% names(table(data_per_animal$Strain)[table(data_per_animal$Strain) < 5]),]
 Strains.out <- out.df$Strain
 #out.df <- out.df[out.df$Strain %in% setdiff(Strains.out,Strains8),]
-out.df$Strain <- droplevels(out.df$Strain)
+#out.df$Strain <- droplevels(out.df$Strain)
 out.df$MouseID <- droplevels(out.df$MouseID)
 total_animals <- sapply(seq(length(unique(out.df$Strain))), function(x) table(data_per_animal$Strain)[paste0(unique(out.df$Strain)[x])])
 out_animals <- sapply(seq(length(unique(out.df$Strain))), function(x) table(out.df$Strain)[paste0(unique(out.df$Strain)[x])])
@@ -171,11 +182,11 @@ df <- df[with(df,order(-Proportion)),]
 #df$color <- ifelse(df$Strain %in% c('Pcdh9-/+','Alg11-/+','Sfxn5-/+','Nsun5-/-','Whamm-/-'), "red", "black")
 #df$Strain <- glue("<i style='color:{color}'>{Strain}</i>")
 #sapply(seq(nrow(out.df)), function(x) length(unique(data_per_animal[data_per_animal$Strain %in% out.df$Strain[x],'MouseID'])))
-ggplot(df, aes(x=Strain,y=Proportion)) + geom_bar(stat='identity') + theme_bw(base_size=22) +  
+ggplot(df, aes(x=Strain,y=Proportion)) + geom_bar(stat='identity') + theme_minimal(base_size=22) +  
 theme(axis.text.x=element_text(angle = 90,hjust=1,vjust=0.5), 
 	axis.text.x.top = element_text(vjust=0.5)) + labs(y = 'Proportion') + 
-geom_text(label = paste0(df$Animals),vjust = -.01, hjust = 0.5,size=4.5)
-ggsave('../Temp6/animal-by-strain-prop-outliers.pdf', width=11.75, height=5.5)
+geom_text(label = paste0(df$Animals),vjust = -0.1, hjust = 0.5,size=5.5) + coord_cartesian(clip = "off")
+ggsave('../Temp7/animal-by-strain-prop-outliers.pdf', width=11.75, height=3.8)
 
 mouseID.out <- sapply(seq(length(unique(out.df$Strain))), function(x) 
 	out.df[out.df$Strain == unique(out.df$Strain)[x],'MouseID'])
@@ -263,7 +274,8 @@ lapply(seq(length(Mutants)), function(m) {
 	dfa <- data_per_animal[data_per_animal$MouseID %in% CtrlIDs, ]
 	dfa$Genotype <- ifelse(dfa$Strain == 'C57BL/6NJ', 'Control', 'Mutant')
 	dfa$MouseID <- droplevels(dfa$MouseID)
-	dfa <- dfa[dfa$TestDate %in% names(which(table(dfa$TestDate, dfa$Genotype)[,2] >= 1)), ]
+	#dfa <- dfa[dfa$TestDate %in% '2016-09-06', ] #only for Alg11 for plotting purposes
+	dfa <- dfa[dfa$TestDate %in% names(which(table(dfa$TestDate, dfa$Genotype)[,2] >= 1)), ] #for everything else
 	dfa$TestDate <- droplevels(dfa$TestDate)
 	#CtrlIDs <- sample(unique(dfa[dfa$Genotype=='Control','MouseID']), length(unique(dfa[dfa$Genotype=='Mutant','MouseID'])))
 	CtrlIDs <- setdiff(unique(dfa[dfa$Genotype == 'Control', 'MouseID']), unique(out.df$MouseID))
@@ -274,8 +286,8 @@ lapply(seq(length(Mutants)), function(m) {
 		ifelse(df$MouseID %in% CtrlIDs, -1, 0))) 
 	if (!("0" %in% levels(df$Outlier))){df$Outlier <- factor(df$Outlier, levels = c("0",levels(df$Outlier)))}
 	df2 <- df[,names(df) %in% c(Phenos.lin)]
-	df2 <- data.frame(do.call(cbind,lapply(seq(length(Phenos.lin)), function(p) 
-		as.numeric(resid(lm(df[[Phenos.lin[p]]] ~ BodyLength, data = df))))))
+	#df2 <- data.frame(do.call(cbind,lapply(seq(length(Phenos.lin)), function(p) 
+	#	as.numeric(resid(lm(df[[Phenos.lin[p]]] ~ BodyLength, data = df))))))
 	names(df2) <- Phenos.lin.Nomen
 	df2 <- cbind(id = 1:dim(df)[1], df2)
 	df.melt <- reshape::melt(df2, id.vars = 'id')
@@ -283,19 +295,19 @@ lapply(seq(length(Mutants)), function(m) {
 	df.melt$Outlier <- as.factor(ifelse(df.melt$MouseID %in% out.df$MouseID, 1, 
 		ifelse(df.melt$MouseID %in% CtrlIDs, -1, 0))) 
 	if (!("0" %in% levels(df.melt$Outlier))){df.melt$Outlier <- factor(df.melt$Outlier, levels = c("0",levels(df.melt$Outlier)))}
-	ggplot(df.melt[df.melt$variable %in% c('Base Tail LD'),], aes(x=MouseID,y=value)) + 
-	geom_boxplot(outlier.shape=NA,aes(fill = Outlier),alpha = 0.4) +  
+	p2 <- ggplot(df.melt[df.melt$variable %in% c('Base Tail LD','Tip Tail LD','Nose LD'),], aes(x=MouseID,y=value)) + 
+	geom_boxplot(outlier.shape=NA,aes(fill = Outlier),alpha = 0.4) + 
 	facet_wrap(~ variable, scales = 'free') + ggtitle(paste0(Mutants[m])) + 
 	scale_fill_manual(name = 'Genotype', values =c("0" = "black","1" = "#d94801", "-1" = "#6a51a3"), 
 		labels = c("0"='Mutant',"-1"='Control',"1"="Mutant (Outlier)"), drop = FALSE) + theme_bw(base_size=22) + 
-	theme(axis.text.x=element_text(angle=90,size=18), legend.position='top') + labs(y = 'Residuals')
+	theme(axis.text.x=element_text(angle=90,size=16), legend.position='none') + labs(y = 'Residuals') 
 	#ggsave(paste0('../Temp5/',gsub("*./.*","",Mutants[m]),'.pdf'), width=16,height=16)
 	ggsave(paste0('../Temp5/',gsub("*./.*","",Mutants[m]),'.pdf'), width=25,height=9)
 	
 #geom_jitter(color='grey50',alpha=0.3,width=0.01, shape = 1, stroke=1) +
 })
 
-ggsave('../Temp6/sfxn-alg11.pdf', width = 14, height = 9)
+ggsave('../Temp7/sfxn-alg11-2.pdf', width = 12, height = 10)
 
 dfa <- data_per_animal[data_per_animal$Strain == 'Nsun5-/-',]
 dfa$Outlier <- as.factor(ifelse(dfa$MouseID %in% out.df$MouseID, 1, 0)) 
@@ -331,14 +343,14 @@ scale_color_manual(values=c("red","grey50","grey50","grey50","grey50","grey50","
 df <- data_per_strain
 tmp <- mvoutlier::pcout(df[,names(df) %in% Phenos.lin])
 df.out <- data.frame(Distance1 = tmp$x.dist1, Distance2 = tmp$x.dist2, Strain = df[,'Strain'],
-	Outlier = as.numeric(!tmp$wfinal01))
+	Outlier = as.numeric(!tmp$wfinal01),WeightL = tmp$wloc, WeightS = tmp$wscat)
 df.out[df.out$Strain == 'C57BL/6NJ', 'Outlier'] <- -1
 df.out$Outlier <- as.factor(df.out$Outlier)
-ggplot(df.out, aes(x = Distance1, y=Distance2)) + geom_point(alpha=0.8, aes(color=Outlier), size=4) + 
-ggrepel::geom_text_repel(aes(label=ifelse(Outlier %in% c(-1,1),as.character(Strain),'')),size=8,box.padding=2) + 
+ggplot(df.out, aes(x = Distance1, y=Distance2)) + geom_point(alpha=0.8, aes(color=Outlier), size=11) + 
+ggrepel::geom_text_repel(aes(label=ifelse(Outlier %in% c(-1,1),as.character(Strain),'')),size=24,box.padding=6) + 
 labs(x = 'Distance1', y = 'Distance2') + ggtitle('KOMP strain outliers') + scale_color_manual(values=c("black","grey50","red")) + 
-theme_bw(base_size = 22) + theme(legend.position='none')
-ggsave('../Temp5/komp-strain-outliers5.pdf', width=9, height=9)
+theme_bw(base_size = 60) + theme(legend.position='none')
+ggsave('../Temp7/komp-strain-outliers.pdf', width=31.9, height=31.9)
 
 Mutants.out <- c("Cldn13-/-","Kcnd3-/-","Keg1-/-","Rab11a-/+","Rapgef1-/+","Sema6a-/+","Sfxn5-/+")
 tmp <- gtools::permutations(n=7,r=2,v=1:7)
@@ -348,6 +360,11 @@ lapply(seq(nrow(tmp)), function(x) {cat("Permutation = ", x, "\n");
 }
 )
 
+#Mutants <- c('Arpc5l-/+','Fam120b-/+')
+#Mutants <- c('Tlk1-/-','Fam120b-/+')
+Mutants <- c('Ndufs8-/+','Fam120b-/+')
+Mutants <- c('Rusc1-/-','Spin1-/+')
+Mutants <- c('Dgkh-/-','Tmem222-/+')
 komp_lda <- function(Mutants){
 	df <- data.frame()
 	CtrlStrain <- "C57BL/6NJ"
@@ -361,34 +378,38 @@ komp_lda <- function(Mutants){
 		df1$Strain <- droplevels(df1$Strain)
 		df <- rbind(df,df1)
 	}
-	df <- unique(df)
-	df$Outlier <- as.factor(sapply(seq(nrow(df)), function(x) df.out[df.out$MouseID == df$MouseID[x], 'Outlier']))
-	df[df$Strain == CtrlStrain, 'Outlier'] <- 0 
+	#df <- unique(df)
+	df <- df[,-which(names(df) %in% c('BodyLength','TestDate','TestAge','Sex'))] #Remove BodyLength
+	#df$Outlier <- as.factor(sapply(seq(nrow(df)), function(x) df.out[df.out$MouseID == df$MouseID[x], 'Outlier']))
+	#df[df$Strain == CtrlStrain, 'Outlier'] <- 0 
 	MutStrain <- setdiff(levels(df$Strain),CtrlStrain)
 	df$Strain <- factor(df$Strain, levels = c(CtrlStrain,MutStrain[1],MutStrain[2]), ordered=TRUE)
 	#df <- df[,-which(names(df) %in% c('BodyLength'))] #Remove BodyLength
-	df[,sapply(df,is.numeric)] <- apply(df[,sapply(df,is.numeric)], 2, function(x) (x - mean(x))/sd(x))
-	FReffects <- 'BodyLength'
-	formulas <- unname(sapply(Phenos.lin ,function(x) paste(x, "~", FReffects), simplify=TRUE)) 
-   	fits <- lapply(formulas, lm, data = df)
-   	df_resid <- data.frame(sapply(seq(Phenos.lin), function(x) resid(fits[[x]])))
-   	colnames(df_resid) <- Phenos.lin
-   	df_resid <- cbind(Strain = df$Strain, df_resid)
+	df[,sapply(df,is.numeric)] <- apply(df[,sapply(df,is.numeric)], 2, function(x) (x - mean(x,na.rm=TRUE))/sd(x,na.rm=TRUE))
+	#FReffects <- 'BodyLength'
+	#formulas <- unname(sapply(Phenos.lin ,function(x) paste(x, "~", FReffects), simplify=TRUE)) 
+   	#fits <- lapply(formulas, lm, data = df)
+   	#df_resid <- data.frame(sapply(seq(Phenos.lin), function(x) resid(fits[[x]])))
+   	#colnames(df_resid) <- Phenos.lin
+   	#df_resid <- cbind(Strain = df$Strain, df_resid)
    	#df_lda <- df_resid
    	#df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
 
+   	
+   	df_resid <- df
 	df_svd <- svd(df_resid[,sapply(df_resid,is.numeric)])
 	df_pca <- df_svd$u %*% diag(df_svd$d)
-	df_lda <- data.frame(Strain = df$Strain, df_pca[,1:9])
-	colnames(df_lda)[2:ncol(df_lda)] <- Phenos.lin
+	tmp <- df_svd$d^2/(nrow(df)-1)
+	df_lda <- data.frame(Strain = df$Strain, df_pca[,1:6])
+	#colnames(df_lda)[2:ncol(df_lda)] <- Phenos.lin
 	#df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
-	fit_lda <- lda(Strain ~ ., data = df_lda)
+	fit_lda <- lda(Strain ~ ., data = df_lda, prior = c(1,1,1)/3)
 	lda_values <- predict(fit_lda, df_lda[,-1])
 	C <- ggplot(data = data.frame(Strain = df$Strain, lda_values$x), aes(x=LD1,y=LD2,shape=Strain,color=Strain,fill=Strain)) + geom_point(size = 2,aes(color=Strain)) + 
 	stat_ellipse(geom = "polygon", alpha = 1/3, aes(fill=Strain)) + theme_bw(base_size = 16) + theme(legend.position = 'top') + 
 	scale_color_manual(values = c(assign(CtrlStrain,"#e41a1c"),assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a"))) + 
-	scale_fill_manual(values = c("C57BL/6NJ" = "#e41a1c",assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a"))) + 
-	ggrepel::geom_text_repel(aes(label=ifelse(df$Outlier ==1,as.character(df$MouseID),'')),size=8,box.padding=2,show.legend=FALSE) 
+	scale_fill_manual(values = c("C57BL/6NJ" = "#e41a1c",assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a"))) 
+	#ggrepel::geom_text_repel(aes(label=ifelse(df$Outlier ==1,as.character(df$MouseID),'')),size=8,box.padding=2,show.legend=FALSE) 
 
 
 	#tmp <- plsda(df[,names(df) %in% c(Phenos.lin)], df$Strain)
@@ -438,6 +459,171 @@ komp_lda <- function(Mutants){
 	return(p)
 }
 
+#Mutants <- c("Ndufs8-/+","Fam120b-/+")
+Mutants <- c('Nsun5-/-','Fam120b-/+')
+Mutants <- c('Rusc1-/-','Spin1-/+')
+Mutants <- c('Arpc5l-/+','Fam120b-/+')
+df <- data.frame()
+CtrlStrain <- "C57BL/6NJ"
+for (m in seq(Mutants)){
+	#cat("Mutant", paste0(Mutants[m]), "\n")
+	CtrlIDs <- unique(subset(controlids.df,Strain == Mutants[m])$MouseID)
+	df1 <- data_per_animal[data_per_animal$MouseID %in% CtrlIDs,]
+	df1['Genotype'] <- ifelse(df1$Strain == CtrlStrain, 'Control','Mutant')
+   	df1$Genotype <- relevel(factor(df1$Genotype), ref = "Control")
+	df1 <- df1[df1$TestDate %in% names(which(table(df1$TestDate, df1$Genotype)[,2] >= 1)), ]
+	df1$Strain <- droplevels(df1$Strain)
+	df <- rbind(df,df1)
+}
+#df <- unique(df)
+df <- df[,-which(names(df) %in% c('BodyLength','TestDate','TestAge','Sex'))] #Remove BodyLength
+#df$Outlier <- as.factor(sapply(seq(nrow(df)), function(x) df.out[df.out$MouseID == df$MouseID[x], 'Outlier']))
+#df[df$Strain == CtrlStrain, 'Outlier'] <- 0 
+MutStrain <- setdiff(levels(df$Strain),CtrlStrain)
+df$Strain <- factor(df$Strain, levels = c(CtrlStrain,MutStrain[1],MutStrain[2]), ordered=TRUE)
+#df <- df[,-which(names(df) %in% c('BodyLength'))] #Remove BodyLength
+
+
+#Step 1
+df0 <- df[df$Strain %in% CtrlStrain,]
+df1 <- df[df$Strain %in% Mutants[1],]
+df2 <- df[df$Strain %in% Mutants[2],]
+
+mean_vec <- matrix(0,nrow=length(Phenos.lin),3)
+mean_vec[,1] <- apply(df0[,sapply(df0,is.numeric)],2,mean)
+mean_vec[,2] <- apply(df1[,sapply(df1,is.numeric)],2,mean)
+mean_vec[,3] <- apply(df2[,sapply(df2,is.numeric)],2,mean)
+
+#Computing the scatter matrices using Ledoit-Wolf Shrinkage estimator
+cov0 <- nlshrink::linshrink_cov(as.matrix(df0[,-which(names(df0) %in% c('Strain','MouseID','Genotype'))])) 
+cov1 <- nlshrink::linshrink_cov(as.matrix(df1[,-which(names(df1) %in% c('Strain','MouseID','Genotype'))]))
+cov2 <- nlshrink::linshrink_cov(as.matrix(df2[,-which(names(df2) %in% c('Strain','MouseID','Genotype'))]))
+
+#cov0 <- cov(as.matrix(df0[,-which(names(df0) %in% c('Strain','MouseID','Genotype'))]))
+#cov1 <- cov(as.matrix(df1[,-which(names(df1) %in% c('Strain','MouseID','Genotype'))]))
+#cov2 <- cov(as.matrix(df2[,-which(names(df2) %in% c('Strain','MouseID','Genotype'))])) 
+covw <- cov0 + cov1 + cov2
+#Computing Between-class scatter matrix 
+overall_mean <- apply(mean_vec,1,mean)
+N <- c(nrow(df0),nrow(df1),nrow(df2))
+sum <- 0 
+for (i in 1:3){
+	sum <- sum + N[i]*(mean_vec[,i] - overall_mean)%*%t(mean_vec[,i] - overall_mean)
+}
+covb <- sum
+tmp <- eigen(solve(covw)%*%covb)
+tmp2 <- tmp$vectors[,1:2]
+Y <- as.matrix(df[,-which(names(df) %in% c('Strain','MouseID','Genotype'))])%*%tmp2
+Y <- as.data.frame(Y)
+Y$Strain <- df$Strain
+C <- ggplot(data = Y, aes(x=V1,y=V2,shape=Strain,color=Strain,fill=Strain)) + geom_point(size = 2,aes(color=Strain)) + 
+	stat_ellipse(geom = "polygon", alpha = 1/3, aes(fill=Strain)) + theme_bw(base_size = 16) + theme(legend.position = 'top') + 
+	scale_color_manual(values = c(assign(CtrlStrain,"#e41a1c"),assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a"))) + 
+	scale_fill_manual(values = c("C57BL/6NJ" = "#e41a1c",assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a"))) + 
+	labs(x = 'LD1', y = 'LD2')
+
+PCLD_df <- as.data.frame(tmp2)
+rownames(PCLD_df) <- Phenos.lin
+PCLD1 <- data.frame(Phenos = Phenos.lin.Nomen, value = abs(PCLD_df[,1]))
+PCLD1$Phenos <- factor(PCLD1$Phenos, levels = c('Speed','Limb Duty Factor', 'Step Length', 'Step Width', 
+	'Stride Length', 'TS', 'Base Tail LD', 'Tip Tail LD', 'Nose LD'))
+CX <- ggplot(PCLD1, aes(x = Phenos, y = value)) + geom_bar(stat = 'identity', color = 'black') + theme_bw(base_size = 16) +
+theme(axis.text.x = element_text(angle=90,hjust=1,vjust=0.5)) + labs(x = NULL, y = 'Loadings') + ggtitle('LD1')
+PCLD2 <- data.frame(Phenos = Phenos.lin.Nomen, value = abs(PCLD_df[,2]))
+PCLD2$Phenos <- factor(PCLD1$Phenos, levels = c('Speed','Limb Duty Factor', 'Step Length', 'Step Width', 
+	'Stride Length', 'TS', 'Base Tail LD', 'Tip Tail LD', 'Nose LD'))
+CY <- ggplot(PCLD2, aes(x = Phenos, y = value)) + geom_bar(stat = 'identity', color = 'black') + theme_bw(base_size = 16) +
+theme(axis.text.x = element_text(angle=90,hjust=1,vjust=0.5)) + labs(x = NULL, y = NULL) + ggtitle('LD2')
+phenotype <- PCLD1$Pheno[which.max(PCLD1$value)]
+phenoname <- Phenos.lin[which(Phenos.lin.Nomen == phenotype)]
+p1 <- ggplot(df, aes_string(x = 'Strain', y = phenoname, fill = 'Strain')) + geom_boxplot(alpha = 1/3, outlier.shape = NA) + theme_bw(base_size = 16) + 
+		theme(legend.position = 'none', axis.text.x=element_blank(), 
+			axis.ticks.x=element_blank()) + labs(y = paste0(phenotype," ", "(Residuals)")) + 
+		scale_fill_manual(values = c("C57BL/6NJ" = "#e41a1c",assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a")))
+
+
+phenotype <- PCLD2$Pheno[which.max(PCLD2$value)]
+phenoname <- Phenos.lin[which(Phenos.lin.Nomen == phenotype)]
+p2 <- ggplot(df, aes_string(x = 'Strain', y = phenoname, fill = 'Strain')) + geom_boxplot(alpha = 1/3, outlier.shape = NA) + theme_bw(base_size = 16) + 
+		theme(legend.position = 'none', axis.text.x=element_blank(), 
+			axis.ticks.x=element_blank()) + labs(y = paste0(phenotype," ", "(Residuals)")) + 
+			scale_fill_manual(values = c("C57BL/6NJ" = "#e41a1c",assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a")))
+	
+
+layout_matrix <- rbind(c(1,1,1,2,3),c(1,1,1,4,5))
+p <- gridExtra::grid.arrange(C,CX,CY,p1,p2,layout_matrix = layout_matrix)
+
+
+
+#sort(setdiff(unique(data_per_animal$Strain), tmp3v[[4]]))
+komp_lda_supp <- function(Mutants){
+	df <- data.frame()
+	CtrlStrain <- "C57BL/6NJ"
+	for (m in seq(Mutants)){
+		#cat("Mutant", paste0(Mutants[m]), "\n")
+		CtrlIDs <- unique(subset(controlids.df,Strain == Mutants[m])$MouseID)
+		df1 <- data_per_animal[data_per_animal$MouseID %in% CtrlIDs,]
+		df1['Genotype'] <- ifelse(df1$Strain == CtrlStrain, 'Control','Mutant')
+    	df1$Genotype <- relevel(factor(df1$Genotype), ref = "Control")
+		df1 <- df1[df1$TestDate %in% names(which(table(df1$TestDate, df1$Genotype)[,2] >= 1)), ]
+		df1$Strain <- droplevels(df1$Strain)
+		df <- rbind(df,df1)
+	}
+	df <- unique(df)
+	df <- df[complete.cases(df),]
+	df$Outlier <- as.factor(sapply(seq(nrow(df)), function(x) df.out[df.out$MouseID == df$MouseID[x], 'Outlier']))
+	df[df$Strain == CtrlStrain, 'Outlier'] <- 0 
+	MutStrain <- setdiff(levels(df$Strain),CtrlStrain)
+	df$Strain <- factor(df$Strain, levels = c(CtrlStrain,MutStrain[1],MutStrain[2]), ordered=TRUE)
+	#FReffects <- 'BodyLength'
+	#formulas <- unname(sapply(Phenos.lin ,function(x) paste(x, "~", FReffects), simplify=TRUE)) 
+   	#fits <- lapply(formulas, lm, data = df)
+   	#df_resid <- data.frame(sapply(seq(Phenos.lin), function(x) resid(fits[[x]])))
+   	#colnames(df_resid) <- Phenos.lin
+   	#df_resid <- cbind(Strain = df$Strain, df_resid)
+   	#df_lda <- df_resid
+   	#df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
+   	df_resid <- df
+	df_svd <- svd(df_resid[,sapply(df_resid,is.numeric)])
+	df_pca <- df_svd$u %*% diag(df_svd$d)
+	df_lda <- data.frame(Strain = df$Strain, df_pca[,1:6])
+	#colnames(df_lda)[2:ncol(df_lda)] <- Phenos.lin
+	#df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
+	fit_lda <- lda(Strain ~ ., data = df_lda)
+	lda_values <- predict(fit_lda, df_lda[,-1])
+	C <- ggplot(data = data.frame(Strain = df$Strain, lda_values$x), aes(x=LD1,y=LD2,shape=Strain,color=Strain,fill=Strain)) + 
+	geom_point(size = 5,aes(color=Strain)) + stat_ellipse(geom = "polygon", alpha = 1/3, aes(fill=Strain)) + 
+	theme_bw(base_size = 25) + theme(legend.position = 'none') + 
+	scale_color_manual(values = c(assign(CtrlStrain,"#e41a1c"),assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a"))) + 
+	scale_fill_manual(values = c(assign(CtrlStrain,"#e41a1c"),assign(MutStrain[1],"#377eb8"),assign(MutStrain[2],"#4daf4a"))) 
+	#+ ggrepel::geom_text_repel(aes(label=ifelse(df$Outlier ==1,as.character(df$MouseID),'')),size=8,box.padding=2,show.legend=FALSE)
+	return(C)
+}
+
+C1 <- komp_lda_supp(c("Adgre4-/-","Zfp422-/-"))
+C2 <- komp_lda_supp(c("Xpnpep3-/+","Tomm22-/+"))
+C3 <- komp_lda_supp(c("Hap1-/+","Sema6a-/+"))
+C4 <- komp_lda_supp(c("Cmtr2-/+","Mrps22-/+"))
+C5 <- komp_lda_supp(c("Rapgef1-/+","Elavl1-/+"))
+C6 <- komp_lda_supp(c("Ofcc1-/-","Il1a-/-"))
+(C1|C2|C3)/(C4|C5|C6)
+dev.print(pdf,'../Temp7/LDA-supp-LabM.pdf',width=17.8, height = 11.1) 
+#"#e41a1c","#377eb8"
+
+#####Legends#####
+Mutants <- c("Ofcc1-/-","Il1a-/-")
+df.tmp <- data.frame(value = c(0,1,-1), Strain = c(CtrlStrain,Mutants[1],Mutants[2]))
+df.tmp$Strain <- factor(df.tmp$Strain, levels = c(CtrlStrain,Mutants[1],Mutants[2]), ordered=TRUE)
+p0 <- ggplot(df.tmp,aes(y=value,x=Strain,color=Strain,shape=Strain,fill=Strain)) + geom_point() + 
+scale_color_manual(values=c("#e41a1c","#377eb8","#4daf4a")) + theme_bw(base_size=22) +  
+theme(legend.position='top') + 
+guides(color = guide_legend(override.aes = list(size = 5))) 
+legend <- cowplot::get_legend(p0)
+grid.newpage()
+grid.draw(legend)
+dev.print(pdf,'../Temp7/LDA-supp-legend-F.pdf', width=6.26, height=0.66)
+
+
 df <- data.frame(Strain = data_per_animal$Strain, MouseID = data_per_animal$MouseID, Sex = data_per_animal$Sex)
 df <- cbind(df, apply(data_per_animal[,names(data_per_animal) %in% Phenos.lin],2,function(x) (x - mean(x))/sd(x)))
 tmp <- mvoutlier::pcout(df[,names(df) %in% Phenos.lin])
@@ -471,14 +657,14 @@ komp_lda_outliers <- function(Mutants){
    	df_resid <- data.frame(sapply(seq(Phenos.lin), function(x) resid(fits[[x]])))
    	colnames(df_resid) <- Phenos.lin
    	df_resid <- cbind(Strain = df$Strain, df_resid)
-   	df_lda <- df_resid
-    df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
+   	#df_lda <- df_resid
+    #df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
 
-	#df_svd <- svd(df[,sapply(df,is.numeric)])
-	#df_pca <- df_svd$u %*% diag(df_svd$d)
-	#df_lda <- data.frame(Strain = df$Strain, df_pca[,1:4])
-	#df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
-	fit_lda <- lda(Strain ~ ., data = df_lda)
+	df_svd <- svd(df_resid[,sapply(df_resid,is.numeric)])
+	df_pca <- df_svd$u %*% diag(df_svd$d)
+	df_lda <- data.frame(Strain = df$Strain, df_pca[,1:2])
+	df_lda <- data.frame(Strain = df$Strain, df[,names(df) %in% Phenos.lin])
+	fit_lda <- rda::rda(Strain ~ ., data = df_lda)
 	lda_values <- predict(fit_lda, df_lda[,-1])
 	C <- ggplot(data = data.frame(Strain = df$Strain, lda_values$x), aes(x=LD1,y=LD2,shape=Strain)) + geom_point(size = 2,aes(color=Strain)) + 
 	stat_ellipse(geom = "polygon", alpha = 1/3, aes(fill = Strain)) + theme_bw(base_size = 16) + theme(legend.position = 'top') + 

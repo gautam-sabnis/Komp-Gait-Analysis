@@ -32,7 +32,7 @@ data_per_stride$Strain <- sapply(seq(nrow(data_per_stride)), function(x) gsub("<
 data_per_stride$Strain <- sapply(seq(nrow(data_per_stride)), function(x) gsub(" ", "", data_per_stride$Strain[x]))
 data_per_stride$Strain <- as.factor(data_per_stride$Strain)
 data_per_stride$MouseID <- droplevels(data_per_stride$MouseID)
-data_per_animal <- aggregate(x = data_per_stride[,names(data_per_stride) %in% c(Phenos.lin)], by = data_per_stride[c("MouseID")], FUN = mean)
+data_per_animal <- aggregate(x = data_per_stride[,names(data_per_stride) %in% c(Phenos.lin)], by = data_per_stride[c("MouseID")], FUN = var)
 Strain <- sapply(seq(dim(data_per_animal)[1]), function(x) data_per_stride[data_per_stride$MouseID == data_per_animal$MouseID[x], 'Strain'][1])
 TestDate <- sapply(seq(dim(data_per_animal)[1]), function(x) data_per_stride[data_per_stride$MouseID == data_per_animal$MouseID[x], 'TestDate'][1])
 TestAge <- sapply(seq(dim(data_per_animal)[1]), function(x) data_per_stride[data_per_stride$MouseID == data_per_animal$MouseID[x], 'TestAge'][1])
@@ -122,11 +122,11 @@ komp_lmer <- function(CtrlStrain="C57BL/6NJ", model){
 		}
 		df['Genotype'] <- ifelse(df$Strain == CtrlStrain, 'Control','Mutant')
     	df$Genotype <- relevel(factor(df$Genotype), ref = "Control")
-		#if (sum(table(df$TestDate,df$Genotype)[,1] & table(df$TestDate,df$Genotype)[,2] >= 1) >= 1){
-    	#	df <- df[df$TestDate %in% names(which(table(df$TestDate, df$Genotype)[,2] >= 1)), ]
-    	#} else {
-    	#	df <- df
-    	#}
+		if (sum(table(df$TestDate,df$Genotype)[,1] & table(df$TestDate,df$Genotype)[,2] >= 1) >= 1){
+    		df <- df[df$TestDate %in% names(which(table(df$TestDate, df$Genotype)[,2] >= 1)), ]
+    	} else {
+    		df <- df
+    	}
 		df$Strain <- droplevels(df$Strain)
 		df$TestDate <- droplevels(df$TestDate)
 		df$Sex <- relevel(factor(df$Sex), ref = "Male")
@@ -140,12 +140,16 @@ komp_lmer <- function(CtrlStrain="C57BL/6NJ", model){
     		 FReffects <- 'speed + Sex + Genotype'}
     	else {FReffects.lmer <- 'BodyLength + Sex + Genotype + (1|TestDate)';
     		 FReffects <- 'BodyLength + Sex + Genotype'}
-    	#if (Mutants[s] == "Bzw1-/-") {FReffects <- 'BodyLength + Genotype'}
+    	if (Mutants[s] == "Bzw1-/-") {FReffects <- 'BodyLength + Genotype'}
     	if (length(levels(df$TestDate)) >= 2){
     		formulas <- unname(sapply(Phenos.lin ,function(x) paste(x, "~", FReffects.lmer), simplify=TRUE)) 
     		fits <- sapply(formulas, function(x) lmer(formula=x, data = df, REML = FALSE,
     			control=lmerControl(check.conv.singular = .makeCC(action = "ignore",  tol = 1e-4))),
     		simplify=FALSE)
+    		#fits <- sapply(formulas, function(x) lmer(formula=x, data = df, REML = FALSE,
+    		#	control=lmerControl(
+            #               optimizer ='optimx', optCtrl=list(method='L-BFGS-B'))),
+    		#simplify=FALSE)
     		pvalGen[s,] <- sapply(seq_along(fits), function(x) anova(unname(fits[x])[[1]],type='II')['Genotype','Pr(>F)']) 
 			esizeGen[s,] <- sapply(fits, function(mod) S(mod)$fixed.effects['GenotypeMutant','Estimate']) 
 			if (min(table(df$Genotype,df$Sex)['Mutant',]) > 1){
@@ -215,7 +219,7 @@ komp_lmer <- function(CtrlStrain="C57BL/6NJ", model){
         border = "black",legend_height = unit(4, "cm"), just = c("right", "top")), col = col_fun, 
     	cluster_rows = FALSE, cluster_columns = FALSE, border = TRUE,cell_fun = function(j, i, x, y, width, height, fill) {
         grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey"))
-        grid.text((pvalGenSignif2[i,j]),x, y, gp = gpar(fontsize = 8))}, column_title=paste0(model,': Variance Phenotypes'))
+        grid.text((pvalGenSignif2[i,j]),x, y, gp = gpar(fontsize = 8))}, column_title=paste0(model,': Mean Phenotypes'))
 
 	col_fun <- circlize::colorRamp2(c(min(esizeGen2),0,max(esizeGen2)),c("#542788","#f7f7f7","#d73027"))
 	ht.Gen.e <- Heatmap((esizeGen2), row_names_gp = gpar(fontsize = 16, fontface="italic"),row_names_side = "left", column_names_gp = gpar(fontsize = 16),
@@ -229,8 +233,8 @@ komp_lmer <- function(CtrlStrain="C57BL/6NJ", model){
 	ht.Gen <- ht.Gen.p + ht.Gen.e
 
 	#Sex
-	#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Bzw1-/-"))
-	Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ"))
+	Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Bzw1-/-"))
+	#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ"))
 	esizeSex <- as.matrix(esizeSex)
 	rownames(pvalSex) <- Mutants
 	colnames(pvalSex) <- Phenos.lin.Nomen
@@ -283,7 +287,7 @@ komp_lmer <- function(CtrlStrain="C57BL/6NJ", model){
 
 
 	return(list(ht.Gen,summ.df.Gen,pinkStrainsGen,blackStrainsGen,ht.Sex,summ.df.Sex,pinkStrainsSex,
-		blackStrainsSex))
+		blackStrainsSex,esizeGen2,lodGen2))
 
 }
 
@@ -292,9 +296,9 @@ tmp2v <- komp_lmer(model = 'M2')
 tmp3v <- komp_lmer(model = 'M3')
 
 
-Strains1 <- tmp1v[[4]]
-Strains2 <- tmp2v[[4]]
-Strains3 <- tmp3v[[4]]
+Strains1v <- tmp1v[[4]]
+Strains2v <- tmp2v[[4]]
+Strains3v <- tmp3v[[4]]
 
 Strains1 <- gsub("*./.*","",Strains1)
 Strains2 <- gsub("*./.*","",Strains2)
@@ -327,7 +331,7 @@ dev.print(pdf,'../Temp4/variance-lmer-M1.pdf', height = 14, width = 8.5)
 dev.print(pdf,'../Temp5/variance-lmer-M3-5.pdf', height = 11.75, width = 6.4)
 
 
-vignette_plot <- function(phenotype, phenoname, esizeGen2 = tmp[[3]], model){
+vignette_plot <- function(phenotype, phenoname, esizeGen2, lodGen2, model){
 	if (model == 'M2' || model == 'M3'){
 		Phenos.lin <- setdiff(Phenos.lin,"speed");
 		Phenos.lin.Nomen <- setdiff(Phenos.lin.Nomen,"Speed");
@@ -335,24 +339,28 @@ vignette_plot <- function(phenotype, phenoname, esizeGen2 = tmp[[3]], model){
 		Phenos.lin <- Phenos.lin;
 		Phenos.lin.Nomen <- Phenos.lin.Nomen;
 	}
-	esize <- names(sort(abs(esizeGen2[,paste0(phenotype)]), decreasing=TRUE)[1:5])
-	dflist <- list();
-	invisible(lapply(seq(length(esize)), function(x) {CtrlIDs <- unique(subset(controlids.df,Strain == esize[x])$MouseID);
-	df <<- data_per_animal[data_per_animal$MouseID %in% CtrlIDs,c('Strain','Sex','TestDate',paste0(phenoname))];
-	df['Genotype'] <<- ifelse(df$Strain == "C57BL/6NJ", 'Control','Mutant');
-	df$Genotype <<- relevel(factor(df$Genotype), ref = "Control");
-	df$Strain <<- droplevels(df$Strain);
-	dflist[[x]] <<- df}))
-	df <- do.call(rbind, dflist)
-	df$Strain <- rep(esize, sapply(seq(length(esize)), function(x) dim(dflist[[x]])[1]))
-	p <- ggplot(df, aes_string(y=phenoname, x='Genotype')) + geom_boxplot(outlier.shape=NA,width=0.7) + 
-	geom_jitter(aes(color=Genotype), width=0.1, size = 5, shape = 1, stroke=1.5) + scale_color_manual(values=c("#6a51a3", "#d94801")) + 
-	theme_bw(base_size = 32) + theme(legend.position='none') + labs(y = paste0(phenotype)) + facet_grid(~Strain)
-	return(p)
+	esize <- names(sort(abs(esizeGen2[lodGen2[,paste0(phenotype)] > 2.98,paste0(phenotype)]), decreasing=TRUE)[1:5])
+	esize <- esize[!is.na(esize)]
+	if (length(esize)!=0){
+			dflist <- list();
+		invisible(lapply(seq(length(esize)), function(x) {CtrlIDs <- unique(subset(controlids.df,Strain == esize[x])$MouseID);
+		dftmp <- data_per_animal[data_per_animal$MouseID %in% CtrlIDs,c('Strain','Sex','TestDate',paste0(phenoname))];
+		dftmp['Genotype'] <- ifelse(dftmp$Strain == "C57BL/6NJ", 'Control','Mutant');
+		dftmp$Genotype <- relevel(factor(dftmp$Genotype), ref = "Control");
+		dftmp$Strain <- droplevels(dftmp$Strain);
+		dflist[[x]] <<- dftmp}))
+		dftmp <- do.call(rbind, dflist)
+		dftmp$Strain <- rep(esize, sapply(seq(length(esize)), function(x) dim(dflist[[x]])[1]))
+		p <- ggplot(dftmp, aes_string(y=phenoname, x='Genotype')) + geom_boxplot(outlier.shape=NA,width=0.7) + 
+		geom_jitter(aes(color=Genotype), width=0.1, size = 5, shape = 1, stroke=1.5) + scale_color_manual(values=c("#6a51a3", "#d94801")) + 
+		theme_bw(base_size = 40) + theme(legend.position='none') + labs(y = paste0(phenotype)) + facet_grid(~Strain)
+		return(p)
+	}
 }
 
-lapply(seq(length(Phenos.lin)), function(x) {vignette_plot(Phenos.lin.Nomen[x],Phenos.lin[x],model='M3'); 
-ggsave(paste0('../Temp5/Vignettes/vignette-var-M3-', Phenos.lin.Nomen[x],'.pdf'), width=16, height=4)})
+lapply(seq(length(Phenos.lin)), function(x) {vignette_plot(Phenos.lin.Nomen[x],Phenos.lin[x],
+	esizeGen2 = tmp2v[[9]],lodGen2 = tmp2v[[10]],model='M2'); 
+ggsave(paste0('../Temp7/Vignettes/vignette-var-M2-', Phenos.lin.Nomen[x],'.pdf'), width=20, height=5)})
 
 check_assumptions <- function(CtrlStrain = 'C57BL/6NJ', model){
 	if (model == 'M2' || model == 'M3'){

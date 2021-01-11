@@ -1,0 +1,95 @@
+Section 3.1 second para: I think there should be some more info on segmentation neural network paper, particularly, how is it similar/different from the current method. What can be used from the previous paper and what can't?
+
+It looks like the gait neural network was trained to distinguish different strains which wasn't the case. I think one can just say that B6 was already in the previous paper and so it can work with that. Additionally, there should be some validation that it worked well for this new environment. Maybe some hand-labeled datasets from KOMP videos? 
+
+The number of mutant lines and animals can be clarified further. Currently, there are three numbers 7606 lines, 1597 lines, 2019 animals. Putting them together will make it easier to understand.
+
+Some reasoning on selected bins (like a histogram in SI to show these cover most data). Some other way should be used to specify bins (10,30) is confusing, small brackets might imply 10 and 30 are excluded, no estimate of bin width. How about some variation of these limits.
+
+Figure1: Camera1 -> Arena1 
+
+Calling them camera can imply that there are multiple cameras for the same arena
+
+Include a dot at the center of the mouse paw (as they are represented by dots and it will help to understand how the metrics are measured, for example, step width is outside limits, inside limits etc) 
+
+Is it important to highlight a visually diverse arena? I didn't find any modifications to address the diverse arenas so should not be emphasized too much else the first question will be to demonstrate that the method works.
+
+each lines -> each line
+
+240 knockouts. Does the data include controls as well? It can be moved to SI and including some figures about the metrics being studied in the paper will be more exciting to me.
+
+The restriction on the number of strides needs justification. What if some mutations severely limit movement. This will exclude those interesting cases. I think this is addressed to some extent in 3.6
+
+B and C show what you selected whereas why this was selected can be more interesting
+
+D-F What are the lines?
+
+3.2: Line 4: in of ->  of
+
+1C: Angular velocity units  
+
+A line on why only six-month data will be useful.
+
+
+How is temporally stable determined (visual inspection?)
+
+Fig2: Replace filled circles with empty circles. Hard to see black dot and error bars currently. 
+
+ 
+
+How about emphasizing the biology more than statistical models...essentially instead of saying that three statistical models were used, one can say that we wanted to test whether body-length plays a role, so fit first model. 
+
+Why use different window for mean and variance phenotypes?
+
+Figure 3: Caption: Maybe say including body-length, Sex and Speed as fixed effects (M3). Pvalue cutoffs for each star and +.
+
+Can the arena be also used as a fixed effect? 
+
+Figure 5B: What is proportion? This can also be represented as upset plot.
+
+Figure 6: Why are the metrics not same at 0 and 100 percent stride? I felt need for some more details (in text) like how is consesus strain stride cycle, amplitude boxplot etc obtained
+
+
+3.7: xx animals: Number missing
+
+What about Abhd17b etc. why were they not identified?
+
+4: It says "we were able to train a neural network": I thought no training was done based on KOMP data
+
+Check last few lines on page 19
+
+
+
+
+ 
+
+
+
+
+
+##############################################################################################################
+COMMENTS BELOW HAVE BEEN ADDRESSED
+##############################################################################################################
+Abstract: univariate, multivariate -> univariate and multivariate
+
+"without any added cost" -> minimal cost? Sometimes reviewers get stuck on such things
+
+Last paragraph introduction: mutants with gait and posture "defects"?
+
+Third para first line: consists -> consists of 
+
+5.1 usies -> uses
+
+5.5.1 and 5.5.2 Can the methods be simplified by providing the R package details only. Any reason for selecting different cutoffs for variance explained (99 and 85) (MAYBE) 
+
+The per animal analysis can be shown first. How were the outliers handled in per strain analysis? An analysis that excludes the outliers (may be with a less strict cutoff for outliers) can also be done. (IF I UNDERSTAND THIS CORRECTLY, WE'VE DONE THIS ALREADY!) 
+
+low effect genes are regulate -> low effect genes regulate
+
+These are are -> These are
+
+We were able to numerous QTLs -> we were able to find numerous QTLs
+
+3.6 focused -> focused on 
+
+3.2: second para: techniques -> technique

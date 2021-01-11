@@ -35,7 +35,7 @@ data_per_stride$Strain <- vapply(seq(nrow(data_per_stride)), function(x) gsub("<
 data_per_stride$Strain <- vapply(seq(nrow(data_per_stride)), function(x) gsub(" ", "", data_per_stride$Strain[x]), FUN.VALUE=character(1))
 data_per_stride$Strain <- as.factor(data_per_stride$Strain)
 data_per_stride$MouseID <- droplevels(data_per_stride$MouseID)
-data_per_animal <- aggregate(x = data_per_stride[,names(data_per_stride) %in% c(Phenos.circ)], by = data_per_stride[c("MouseID")], FUN = mean)
+data_per_animal <- aggregate(x = data_per_stride[,names(data_per_stride) %in% c(Phenos.circ)], by = data_per_stride[c("MouseID")], FUN = angular.variance)
 BodyLength <- sapply(seq(dim(data_per_animal)[1]), function(x) data_per_stride[data_per_stride$MouseID == data_per_animal$MouseID[x], 'BodyLength'][1])
 speed <- sapply(seq(dim(data_per_animal)[1]), function(x) mean(data_per_stride[data_per_stride$MouseID == data_per_animal$MouseID[x], 'speed']))
 Strain <- sapply(seq(dim(data_per_animal)[1]), function(x) data_per_stride[data_per_stride$MouseID == data_per_animal$MouseID[x], 'Strain'][1])
@@ -91,11 +91,12 @@ controlids.df <- komp_select_controls(CtrlStrain="C57BL/6NJ", tw=21) #tw: time w
 
 komp_circular <- function(CtrlStrain="C57BL/6NJ", model){	
 	if (model == 'M1'){
-		#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Enpp5-/-","Elavl1-/+",
-		#"Bcl11b-/+","Rmnd5b-/-","Top3a-/+","Mrps22-/+","Zfp579-/-","Slc50a1-/-","Pdgfrl-/-","Cdc14a-/+"))
-		Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ", "Spin1-/+","Enpp5-/-","Rxfp3-/-",
-			"Mrps22-/+","Zfp579-/-","Ofcc1-/-","Slc50a1-/- ","Slc50a1-/-","Rrs1-/+","Tmco1-/+","Xpnpep3-/+",
-			"Rai14-/+")) #Variance
+		Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Enpp5-/-","Elavl1-/+",
+		"Bcl11b-/+","Rmnd5b-/-","Top3a-/+","Mrps22-/+","Zfp579-/-","Slc50a1-/-","Pdgfrl-/-","Cdc14a-/+",
+		"Kifc2-/-","Ccdc28a-/-","Llgl2-/+","Cldn13-/-","Steap3-/-","Sfxn5-/+","Coq8b-/+","Keg1-/-"))
+		#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ", "Spin1-/+","Enpp5-/-","Rxfp3-/-",
+		#	"Mrps22-/+","Zfp579-/-","Ofcc1-/-","Slc50a1-/- ","Slc50a1-/-","Rrs1-/+","Tmco1-/+","Xpnpep3-/+",
+		#	"Rai14-/+")) #Variance
 	} else if (model == 'M2'){
 		#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Rad51ap1-/-","Gpr15-/-",
 		#"Mettl10-/-","Rxfp3-/-","Pde4c-/-","Zfp422-/-","Hpse2-/+","Mrps22-/+","Cdc14a-/+",
@@ -103,20 +104,21 @@ komp_circular <- function(CtrlStrain="C57BL/6NJ", model){
 		Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Spin1-/+","Zfp422-/-","Mrps22-/+",
 			"Tomm40-/+","Rai14-/+")) #Variance
 	} else {
-		Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Tmem222-/+","Alg11-/+","Rad51ap1-/-",
-			"Kifc2-/-","Ing2-/+","Myom1-/-","Cldn13-/-","Steap3-/-","Coq8b-/+","Fbxo30-/+","Tada1-/+",
-			"Rab3gap2-/-","Ppip5k2-/+","Abi3-/-","Xpnpep3-/+","Dctn6-/+","Adamts14-/-","Sdf2l1-/-",
-			"Tomm22-/+","E130311K13RIK-/-","1700001O22Rik-/-"))
-		#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Tbc1d5-/-","Spin1-/+","Gm572-/+",
-		#	"Mast3-/-","Ofcc1-/-","Ust-/+","Tmco1-/+","Xpnpep3-/+","Ylpm1-/+","Atp5o-/+","Tomm40-/+",
-		#	"Rai14-/+","Pskh1-/+","Rapgef1-/+","Pip5k1c-/+","Rec8-/-","Sesn1-/-","Ccdc28a-/-",
-		#	"Slc6a20b-/-","Ints10-/+","Kcnd3-/-","Steap3-/-","Mpv17-/-","Zfp329-/-","Fam19a1-/-",
-		#	"E130311K13RIK-/-","Igfl3-/-","Tada1-/+","Keg1-/-","Ppip5k2-/+","Tex2-/+","Best2-/+",
-		#	"Dctn6-/+","Dalrd3-/-","Dbn1-/-","Bzw1-/-","Med10-/+","Prpf4b-/+","Tomm22-/+",
-		#	"Sdf2l1-/-","Adamts14-/-","Mcmbp-/+","St6galnac3-/-","Prkcsh-/+","Rusc1-/-","Mrpl58-/+",
-		#	"BC052040-/+","Cdc14a-/+","Abi3-/-","Cmtr2-/+","Nr2f1-/+","Rrs1-/+","1700001O22Rik-/-",
-		#	"Clec3b-/-","Pdgfrl-/-","Slc50a1-/-","Zfp579-/-","Tox4-/+","Arhgap29-/+",
-		#	"Tlk1-/-")) #Variance
+		#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Tmem222-/+","Alg11-/+","Rad51ap1-/-",
+		#	"Kifc2-/-","Ing2-/+","Myom1-/-","Cldn13-/-","Steap3-/-","Coq8b-/+","Fbxo30-/+","Tada1-/+",
+		#	"Rab3gap2-/-","Ppip5k2-/+","Abi3-/-","Xpnpep3-/+","Dctn6-/+","Adamts14-/-","Sdf2l1-/-",
+		#	"Tomm22-/+","E130311K13RIK-/-","1700001O22Rik-/-"))
+		Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Tbc1d5-/-","Spin1-/+","Gm572-/+",
+			"Mast3-/-","Ofcc1-/-","Ust-/+","Tmco1-/+","Xpnpep3-/+","Ylpm1-/+","Atp5o-/+","Tomm40-/+",
+			"Rai14-/+","Pskh1-/+","Rapgef1-/+","Pip5k1c-/+","Rec8-/-","Sesn1-/-","Ccdc28a-/-",
+			"Slc6a20b-/-","Ints10-/+","Kcnd3-/-","Steap3-/-","Mpv17-/-","Zfp329-/-","Fam19a1-/-",
+			"E130311K13RIK-/-","Igfl3-/-","Tada1-/+","Keg1-/-","Ppip5k2-/+","Tex2-/+","Best2-/+",
+			"Dctn6-/+","Dalrd3-/-","Dbn1-/-","Bzw1-/-","Med10-/+","Prpf4b-/+","Tomm22-/+",
+			"Sdf2l1-/-","Adamts14-/-","Mcmbp-/+","St6galnac3-/-","Prkcsh-/+","Rusc1-/-","Mrpl58-/+",
+			"BC052040-/+","Cdc14a-/+","Abi3-/-","Cmtr2-/+","Nr2f1-/+","Rrs1-/+","1700001O22Rik-/-",
+			"Clec3b-/-","Pdgfrl-/-","Slc50a1-/-","Zfp579-/-","Tox4-/+","Arhgap29-/+",
+			"Tlk1-/-","Hsbp1l1-/-","Il1a-/-","Kifc2-/-","Mettl10-/-","Dnajc30-/-","Ptcd3-/+",
+			"Cldn13-/-","Elavl1-/+","Rxfp3-/-","Fbxo30-/+","Dnttip1-/+")) #Variance
 		#Mutants <- setdiff(unique(data_per_animal$Strain),c("C57BL/6NJ","Tmem222-/+","Alg11-/+"))
 	}
 	pvalGen <- data.frame(matrix(0,nrow=length(Mutants),ncol=length(Phenos.circ)))
@@ -169,13 +171,21 @@ komp_circular <- function(CtrlStrain="C57BL/6NJ", model){
 	col <- which(abs(esizeGen2)==max(abs(esizeGen2)), arr.ind=TRUE)[1:2][2]
 	esizeGen2[row,col] <- tail(sort(abs(esizeGen2)),2)[1]
 
+	summ.df.Gen <- data.frame(Phenos.circ.Nomen, 
+	pink = sapply(seq(Phenos.circ.Nomen), function(x) sum(as.numeric(lodGen2[,x] > 2.99 & abs(esizeGen2[,x]) >= 0.2))), 
+	black = sapply(seq(Phenos.circ.Nomen), function(x) sum(as.numeric(lodGen2[,x] > 2.99))))
+
+	pinkStrainsGen <- names(which(apply((lodGen2 > 2.99 | lodGen2 > 2.99) & (abs(esizeGen2) >= 0.2 | abs(esizeGen2) >= 0.2),1,any)))
+	blackStrainsGen <- names(apply(lodGen2 > 2.99,1,any))
+
 	col_fun <- colorRamp2(c(2.98,2.99,4,5),c("#ffffbf","#abdda4","#66c2a5","#3288bd"))
-	ht.Gen.p <- Heatmap((lodGen2), row_names_gp = gpar(fontsize = 16, fontface='italic'),row_names_side = "left", column_names_gp = gpar(fontsize = 16),
+	ht.Gen.p <- Heatmap((lodGen2), row_names_gp = gpar(fontsize = 16, fontface='italic',
+		col=ifelse(apply(((lodGen2 > 2.99 | lodGen2 > 2.99) & (abs(esizeGen2) >= 0.2 | abs(esizeGen2 >= 0.2))),1, function(x) any(x == TRUE)), '#dd3497', 'black')),row_names_side = "left", column_names_gp = gpar(fontsize = 16),
     	heatmap_legend_param = list(at = c(2.98,2.99,4,5),title = "-log10(q-value)", title_position = "leftcenter-rot",  
         border = "black",legend_height = unit(4, "cm"), just = c("right", "top")), col = col_fun, 
     	cluster_rows = FALSE, cluster_columns = FALSE, border = TRUE,cell_fun = function(j, i, x, y, width, height, fill) {
         grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey"))
-        grid.text((pvalGenSignif2[i,j]),x, y, gp = gpar(fontsize = 8))}, column_title=paste0(model,': Variance Phenotypes'))
+        grid.text((pvalGenSignif2[i,j]),x, y, gp = gpar(fontsize = 8))}, column_title=paste0(model,': Mean Phenotypes'))
 
 	col_fun <- circlize::colorRamp2(c(min(esizeGen2),0,max(esizeGen2)),c("#542788","#f7f7f7","#d73027"))
 	ht.Gen.e <- Heatmap((esizeGen2), row_names_gp = gpar(fontsize = 16, fontface="italic"),row_names_side = "left", column_names_gp = gpar(fontsize = 16),
@@ -183,7 +193,7 @@ komp_circular <- function(CtrlStrain="C57BL/6NJ", model){
         border = "black",legend_height = unit(4, "cm"), just = c("right", "top")), col = col_fun, 
     	cluster_rows = FALSE, cluster_columns = FALSE, border = TRUE, cell_fun = function(j, i, x, y, width, height, fill) {
         grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey"))
-        grid.circle(x = x, y = y, r = (esizeGen2[i, j]) * 1/2 * (min(unit.c(width, height))),
+        grid.circle(x = x, y = y, r = (esizeGen2[i, j]) * 1 * (min(unit.c(width, height))),
             gp = gpar(fill = col_fun((esizeGen2[i,j]))))}, rect_gp = gpar(type = "none"))
 
 	ht.Gen <- ht.Gen.p + ht.Gen.e

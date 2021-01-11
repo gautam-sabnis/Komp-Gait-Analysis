@@ -46,7 +46,7 @@ df.melt <- reshape::melt(df)
 df.melt <- cbind(rep(unique(nose$Percent.Stride),length(Strains)), df.melt)
 colnames(df.melt) <- c('Percent.Stride','Strain','Displacement')
 getPalette <- colorRampPalette(brewer.pal(8, "Spectral"))
-p1 <- ggplot(df.melt, aes(x = Percent.Stride, y = Displacement, color = Strain)) + geom_line() + theme_bw(base_size = 22) + 
+p1 <- ggplot(df.melt, aes(x = Percent.Stride, y = Displacement, color = Strain)) + geom_line() + theme_bw(base_size = 32) + 
 theme(legend.position = 'none') + labs(y = 'Nose Displacement', x = 'Percent Stride') + ggtitle('Data') + 
 scale_color_manual(values=getPalette(length(Strains)))
 #dev.print(pdf,'../Temp6/nose-original.pdf', width = 4, height = 4)
@@ -65,7 +65,7 @@ dfa.melt <- reshape::melt(dfa)
 dfa.melt <- dfa.melt[,-1]
 dfa.melt <- cbind(rep(unique(nose$Percent.Stride),length(Strains)), dfa.melt)
 colnames(dfa.melt) <- c('Percent.Stride','Strain','Displacement')
-p2 <- ggplot(dfa.melt, aes(x = Percent.Stride, y = Displacement, color = Strain)) + geom_line() + theme_bw(base_size = 22) + 
+p2 <- ggplot(dfa.melt, aes(x = Percent.Stride, y = Displacement, color = Strain)) + geom_line() + theme_bw(base_size = 32) + 
 theme(legend.position = 'none') + labs(y = 'Nose Displacement', x = 'Percent Stride') + ggtitle('Amplitude') + 
 labs(y = NULL, x = NULL) + scale_color_manual(values=getPalette(length(Strains)))
 #dev.print(pdf,'../Temp6/nose-amp.pdf', width = 4, height = 4)
@@ -74,7 +74,7 @@ dfp.melt <- reshape::melt(dfp)
 dfp.melt <- dfp.melt[,-1]
 dfp.melt <- cbind(rep(unique(nose$Percent.Stride),length(Strains)), dfp.melt)
 colnames(dfp.melt) <- c('Percent.Stride','Strain','Displacement')
-p3 <- ggplot(dfp.melt, aes(x = Percent.Stride, y = Displacement, color = Strain)) + geom_line() + theme_bw(base_size = 22) + 
+p3 <- ggplot(dfp.melt, aes(x = Percent.Stride, y = Displacement, color = Strain)) + geom_line() + theme_bw(base_size = 32) + 
 theme(legend.position = 'none') + labs(y = 'Nose Displacement', x = 'Percent Stride') + ggtitle('Phase') + 
 labs(y = NULL, x = NULL) + scale_color_manual(values=getPalette(length(Strains)))
 #dev.print(pdf,'../Temp6/nose-phase.pdf', width = 4, height = 4)
@@ -87,7 +87,7 @@ dfbox.melt <- reshape::melt(dfbox)
 dfbox.melt <- cbind('Percent.Stride' = unique(nose$Percent.Stride), dfbox.melt)
 colnames(dfbox.melt) <- c('Percent.Stride', 'Summary', 'value')
 palette_Dark2 <- colorRampPalette(brewer.pal(14, "Dark2"))
-p4 <- ggplot(dfbox.melt, aes(x = Percent.Stride, y = value, color = Summary)) + geom_line(lwd=1) + theme_bw(base_size = 22) + 
+p4 <- ggplot(dfbox.melt, aes(x = Percent.Stride, y = value, color = Summary)) + geom_line(lwd=1) + theme_bw(base_size = 32) + 
 labs(y = 'Nose Displacement', x = 'Percent Stride') + ggtitle('Amplitude Boxplot') + 
 theme(legend.position = 'none',legend.text=element_text(size=12)) + 
 discrete_scale("color", "manual", palette_Dark2) + labs(y = NULL, x = NULL)
@@ -105,7 +105,7 @@ dfbox.melt <- cbind(dfbox.melt, min = dfsumm$min, max = dfsumm$max)
 colnames(dfbox.melt)[colnames(dfbox.melt)=='variable'] <- 'Strain'
 #colnames(dfbox.melt) <- c('Percent.Stride', 'Summary', 'value')
 #dfbox.melt$Type <- as.factor(ifelse(dfbox.melt$Summary %in% tmp$Strain, paste0(dfbox.melt$Summary), 'Summary'))
-p6 <- ggplot(dfbox.melt, aes(x = Percent.Stride, y = value, color = Strain)) + geom_line(lwd=1) + theme_bw(base_size = 22) + 
+p6 <- ggplot(dfbox.melt, aes(x = Percent.Stride, y = value, color = Strain)) + geom_line(lwd=1) + theme_bw(base_size = 32) + 
 labs(y = 'Nose Displacement', x = 'Percent Stride') + geom_ribbon(aes(ymin=min,ymax=max),alpha=0.2, color ='grey') + 
 ggtitle('Amplitude:Outliers') + 
 scale_color_manual(values = c('#e41a1c','#377eb8','#4daf4a','#984ea3','#6a3d9a','#ff7f00')) + labs(y = NULL, x = NULL)
@@ -117,7 +117,7 @@ dfbox <- data.frame(min = phase_box$minn, Q1 = phase_box$Q1,
 dfbox.melt <- reshape::melt(dfbox)
 dfbox.melt <- cbind('Percent.Stride' = unique(nose$Percent.Stride), dfbox.melt)
 colnames(dfbox.melt) <- c('Percent.Stride', 'Summary', 'value')
-p5 <- ggplot(dfbox.melt, aes(x = Percent.Stride, y = value, color = Summary)) + geom_line(lwd=1) + theme_bw(base_size = 22) + 
+p5 <- ggplot(dfbox.melt, aes(x = Percent.Stride, y = value, color = Summary)) + geom_line(lwd=1) + theme_bw(base_size = 32) + 
 labs(y = 'Nose Displacement', x = 'Percent Stride') + ggtitle('Phase Boxplot') + theme(legend.position = 'none') + 
 discrete_scale("color", "manual", palette_Dark2) + labs(y = NULL, x = NULL)
 #dev.print(pdf,'../Temp6/phase-box.pdf', width = 6, height = 6)
@@ -135,15 +135,15 @@ colnames(dfbox.melt)[colnames(dfbox.melt)=='variable'] <- 'Strain'
 #colnames(dfbox.melt) <- c('Percent.Stride', 'Summary', 'value')
 #dfbox.melt$Type <- as.factor(ifelse(dfbox.melt$Summary %in% tmp$Strain, paste0(dfbox.melt$Summary), 'Summary'))
 p7 <- ggplot(dfbox.melt, aes(x = Percent.Stride, y = value, color = Strain)) + geom_line(lwd=1) + 
-theme_bw(base_size = 22) + geom_ribbon(aes(ymin=min,ymax=max),alpha = 0.2, color = 'grey') + 
+theme_bw(base_size = 32) + geom_ribbon(aes(ymin=min,ymax=max),alpha = 0.2, color = 'grey') + 
 labs(y = 'Nose Displacement', x = 'Percent Stride') + ggtitle('Phase:Outliers') + 
 scale_color_manual(values = c('#e41a1c','#377eb8','#4daf4a','#984ea3','#6a3d9a','#ff7f00','#b15928','#f781bf',
 '#a65628')) + labs(y = NULL, x = NULL)
 #dev.print(pdf,'../Temp6/phase-box-out.pdf', width = 6, height = 6)
 
 (p2/p3) | (p4/p5) | (p6/p7)
-dev.print(pdf,'../Temp6/nose-fda-2.pdf', width = 16, height = 9)
-dev.print(pdf,'../Temp6/nose-data.pdf', width = 9, height = 9)
+dev.print(pdf,'../Temp7/nose-fda-2.pdf', width = 22, height = 12)
+dev.print(pdf,'../Temp7/nose-data.pdf', width = 9, height = 9)
 
 ####Base Tail 
 df <- read.csv('../Data/base_tail.csv', stringsAsFactors = FALSE)
